@@ -47,39 +47,35 @@
  *   current console device.
  *
  ****************************************************************************/
+int main(int argc, FAR char* argv[]) {
+    struct sched_param param;
+    int ret = 0;
 
-int main(int argc, FAR char *argv[])
-{
-  struct sched_param param;
-  int ret = 0;
+    /* Check the task priority that we were started with */
 
-  /* Check the task priority that we were started with */
+    sched_getparam(0, &param);
+    if (param.sched_priority != CONFIG_SYSTEM_NSH_PRIORITY) {
+        /* If not then set the priority to the configured priority */
 
-  sched_getparam(0, &param);
-  if (param.sched_priority != CONFIG_SYSTEM_NSH_PRIORITY)
-    {
-      /* If not then set the priority to the configured priority */
-
-      param.sched_priority = CONFIG_SYSTEM_NSH_PRIORITY;
-      sched_setparam(0, &param);
+        param.sched_priority = CONFIG_SYSTEM_NSH_PRIORITY;
+        sched_setparam(0, &param);
     }
 
-  /* Initialize the NSH library */
+    /* Initialize the NSH library */
+    nsh_initialize();
 
-  nsh_initialize();
+    #ifdef CONFIG_NSH_CONSOLE
+    /* If the serial console front end is selected, run it on this thread */
 
-#ifdef CONFIG_NSH_CONSOLE
-  /* If the serial console front end is selected, run it on this thread */
+    ret = nsh_consolemain(argc, argv);
 
-  ret = nsh_consolemain(argc, argv);
+    /* nsh_consolemain() should not return.  So if we get here, something
+     * is wrong.
+     */
 
-  /* nsh_consolemain() should not return.  So if we get here, something
-   * is wrong.
-   */
+    dprintf(STDERR_FILENO, "ERROR: nsh_consolemain() returned: %d\n", ret);
+    ret = 1;
+    #endif
 
-  dprintf(STDERR_FILENO, "ERROR: nsh_consolemain() returned: %d\n", ret);
-  ret = 1;
-#endif
-
-  return ret;
+    return ret;
 }
