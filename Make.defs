@@ -51,7 +51,7 @@ $(foreach BDIR, $(BUILDIRS), $(eval $(call Add_Application,$(BDIR))))
 
 # File extensions
 
-CXXEXT ?= .cxx
+CXXEXT ?= .cpp
 RUSTEXT ?= .rs
 ZIGEXT ?= .zig
 
