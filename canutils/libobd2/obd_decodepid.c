@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
@@ -30,6 +29,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <inttypes.h>
 #include <nuttx/can/can.h>
 
 #include "canutils/obd.h"
@@ -39,19 +39,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
 #define MAXDATA 16
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
 static char g_data[MAXDATA];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Name: obd_decode_pid
  *
@@ -61,60 +58,54 @@ static char g_data[MAXDATA];
  *   It will return the data decode as text string or NULL if error.
  *
  ****************************************************************************/
+FAR char* obd_decode_pid(FAR struct obd_dev_s* dev, uint8_t pid) {
+    uint32_t pids;
+    int      rpm;
 
-FAR char *obd_decode_pid(FAR struct obd_dev_s *dev, uint8_t pid)
-{
-  uint32_t pids;
-  int rpm;
-
-  /* Verify if received data is valid */
-
-  if (dev->data[2] != pid)
-    {
-      printf("Expecting PID %02x but received %02x!\n", pid, dev->data[2]);
-      return NULL;
+    /* Verify if received data is valid */
+    if (dev->data[2] != pid) {
+        printf("Expecting PID %02x but received %02x!\n", pid, dev->data[2]);
+        return NULL;
     }
 
-  switch (dev->data[2])
-    {
-      case OBD_PID_SUPPORTED:
-        pids = (dev->data[3] << 24) | (dev->data[4] << 16) | \
-               (dev->data[5] << 8) | dev->data[6];
-        snprintf(g_data, MAXDATA, "%08X", pids);
-#ifdef CONFIG_DEBUG_INFO
-        printf("Supported PIDs: %08X\n", pids);
-#endif
-        break;
+    switch (dev->data[2]) {
+        case OBD_PID_SUPPORTED :
+            pids = (dev->data[3] << 24) | (dev->data[4] << 16) | (dev->data[5] << 8) | dev->data[6];
+            snprintf(g_data, MAXDATA, "%08" PRIX32, pids);
+            #ifdef CONFIG_DEBUG_INFO
+            printf("Supported PIDs: %08X\n", pids);
+            #endif
+            break;
 
-      case OBD_PID_ENGINE_TEMPERATURE:
-        snprintf(g_data, MAXDATA, "%d", dev->data[3] - 40);
-#ifdef CONFIG_DEBUG_INFO
-        printf("Engine Temperature = %d\n", dev->data[3] - 40);
-#endif
-        break;
+        case OBD_PID_ENGINE_TEMPERATURE :
+            snprintf(g_data, MAXDATA, "%d", dev->data[3] - 40);
+            #ifdef CONFIG_DEBUG_INFO
+            printf("Engine Temperature = %d\n", dev->data[3] - 40);
+            #endif
+            break;
 
-      case OBD_PID_RPM:
-        rpm = ((256 * dev->data[3]) + dev->data[4]) / 4;
-        snprintf(g_data, MAXDATA, "%d", rpm);
-#ifdef CONFIG_DEBUG_INFO
-        printf("RPM = %d\n", rpm);
-#endif
-        break;
+        case OBD_PID_RPM :
+            rpm = ((256 * dev->data[3]) + dev->data[4]) / 4;
+            snprintf(g_data, MAXDATA, "%d", rpm);
+            #ifdef CONFIG_DEBUG_INFO
+            printf("RPM = %d\n", rpm);
+            #endif
+            break;
 
-      case OBD_PID_SPEED:
-        snprintf(g_data, MAXDATA, "%d", dev->data[3]);
-#ifdef CONFIG_DEBUG_INFO
-        printf("SPEED = %d Km/h\n", dev->data[3]);
-#endif
-        break;
+        case OBD_PID_SPEED :
+            snprintf(g_data, MAXDATA, "%d", dev->data[3]);
+            #ifdef CONFIG_DEBUG_INFO
+            printf("SPEED = %d Km/h\n", dev->data[3]);
+            #endif
+            break;
 
-      case OBD_PID_THROTTLE_POSITION:
-        snprintf(g_data, MAXDATA, "%d", (100 * dev->data[3]) / 255);
-#ifdef CONFIG_DEBUG_INFO
-        printf("Throttle position = %d\n", (100 * dev->data[3]) / 255);
-#endif
-        break;
+        case OBD_PID_THROTTLE_POSITION :
+            snprintf(g_data, MAXDATA, "%d", (100 * dev->data[3]) / 255);
+            #ifdef CONFIG_DEBUG_INFO
+            printf("Throttle position = %d\n", (100 * dev->data[3]) / 255);
+            #endif
+            break;
     }
 
-  return g_data;
+    return (g_data);
 }
