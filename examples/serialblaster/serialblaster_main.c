@@ -44,7 +44,7 @@
  * Private Data
  ****************************************************************************/
 
-static const char s[] = "abcdefghijklmnopqrstuvwxyz";
+static char const s[] = "abcdefghijklmnopqrstuvwxyz";
 
 /****************************************************************************
  * Public Functions
@@ -54,64 +54,55 @@ static const char s[] = "abcdefghijklmnopqrstuvwxyz";
  * serialblaster_main
  ****************************************************************************/
 
-int main(int argc, FAR char *argv[])
-{
-  int ret;
-  int fd;
-  FAR char *devpath;
-  const int slength = sizeof(s)-1;
-  int size = slength;
-  int rem;
+int main(int argc, FAR char* argv[]) {
+    int       ret;
+    int       fd;
+    FAR char* devpath;
+    int const slength = sizeof(s) - 1;
+    int       size    = slength;
+    int       rem;
 
-  if (argc == 1)
-    {
-      devpath = CONFIG_EXAMPLES_SERIALBLASTER_DEVPATH;
+    if (argc == 1) {
+        devpath = CONFIG_EXAMPLES_SERIALBLASTER_DEVPATH;
     }
-  else if (argc == 2)
-    {
-      devpath = argv[1];
+    else if (argc == 2) {
+        devpath = argv[1];
     }
-  else if (argc == 3)
-    {
-      devpath = argv[1];
-      size =  strtol(argv[2], NULL, 10);
+    else if (argc == 3) {
+        devpath = argv[1];
+        size    = strtol(argv[2], NULL, 10);
     }
-  else
-    {
-      fprintf(stderr, "Usage: %s [devpath]\n", argv[0]);
-      goto errout;
+    else {
+        fprintf(stderr, "Usage: %s [devpath]\n", argv[0]);
+        goto errout;
     }
 
-  fd = open(devpath, O_RDWR);
-  if (fd < 0)
-    {
-      printf("%s: ERROR Failed to open %s\n", argv[0], devpath);
-      return -1;
+    fd = open(devpath, O_RDWR);
+    if (fd < 0) {
+        printf("%s: ERROR Failed to open %s\n", argv[0], devpath);
+        return -1;
     }
 
-  rem = size;
-  printf("Sending %d bytes of data to %s (fd=%d)\n", size, devpath, fd);
-  while (rem > 0)
-    {
-      if (rem > slength)
-        {
-          ret = write(fd, s, slength);
-          rem = rem - slength;
+    rem = size;
+    printf("Sending %d bytes of data to %s (fd=%d)\n", size, devpath, fd);
+    while (rem > 0) {
+        if (rem > slength) {
+            ret = write(fd, s, slength);
+            rem = rem - slength;
         }
-      else
-        {
-          ret = write(fd, s, rem);
-          rem = 0;
+        else {
+            ret = write(fd, s, rem);
+            rem = 0;
         }
 
-      UNUSED(ret);
+        UNUSED(ret);
     }
 
-  up_udelay(5000000);
-  close(fd);
-  return 0;
+    up_udelay(5000000);
+    close(fd);
+    return 0;
 
 errout:
-  fflush(stderr);
-  return EXIT_FAILURE;
+    fflush(stderr);
+    return EXIT_FAILURE;
 }
