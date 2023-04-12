@@ -171,7 +171,6 @@ int main(int argc, FAR char* argv[]) {
     printf("Driver: %s\n", devpath);
 
     /* Open the pin driver */
-
     fd = open(devpath, O_RDWR);
     if (fd < 0) {
         int errcode = errno;
@@ -180,7 +179,6 @@ int main(int argc, FAR char* argv[]) {
     }
 
     /* Set the new pintype */
-
     if (havenewtype) {
         ret = ioctl(fd, GPIOC_SETPINTYPE, (unsigned long)newpintype);
         if (ret < 0) {
@@ -192,7 +190,6 @@ int main(int argc, FAR char* argv[]) {
     }
 
     /* Get the pin type */
-
     ret = ioctl(fd, GPIOC_PINTYPE, (unsigned long)((uintptr_t)&pintype));
     if (ret < 0) {
         int errcode = errno;
@@ -202,7 +199,6 @@ int main(int argc, FAR char* argv[]) {
     }
 
     /* Read the pin value */
-
     ret = ioctl(fd, GPIOC_READ, (unsigned long)((uintptr_t)&invalue));
     if (ret < 0) {
         int errcode = errno;
@@ -212,7 +208,6 @@ int main(int argc, FAR char* argv[]) {
     }
 
     /* Perform the test based on the pintype and on command line options */
-
     switch (pintype) {
         case GPIO_INPUT_PIN : {
             printf("  Input pin:     Value=%u\n", (unsigned int)invalue);
@@ -234,7 +229,6 @@ int main(int argc, FAR char* argv[]) {
                 printf("  Writing:       Value=%u\n", (unsigned int)outvalue);
 
                 /* Write the pin value */
-
                 ret = ioctl(fd, GPIOC_WRITE, (unsigned long)outvalue);
                 if (ret < 0) {
                     int errcode = errno;
@@ -245,7 +239,6 @@ int main(int argc, FAR char* argv[]) {
                 }
 
                 /* Re-read the pin value */
-
                 ret = ioctl(fd, GPIOC_READ, (unsigned long)((uintptr_t)&invalue));
                 if (ret < 0) {
                     int errcode = errno;
@@ -275,7 +268,6 @@ int main(int argc, FAR char* argv[]) {
                 notify.sigev_signo  = signo;
 
                 /* Set up to receive signal */
-
                 ret = ioctl(fd, GPIOC_REGISTER, (unsigned long)&notify);
                 if (ret < 0) {
                     int errcode = errno;
@@ -287,7 +279,6 @@ int main(int argc, FAR char* argv[]) {
                 }
 
                 /* Wait up to 5 seconds for the signal */
-
                 sigemptyset(&set);
                 sigaddset(&set, signo);
 
@@ -296,7 +287,6 @@ int main(int argc, FAR char* argv[]) {
 
                 ret = sigtimedwait(&set, NULL, &ts);
                 ioctl(fd, GPIOC_UNREGISTER, 0);
-
                 if (ret < 0) {
                     int errcode = errno;
                     if (errcode == EAGAIN) {
@@ -315,7 +305,6 @@ int main(int argc, FAR char* argv[]) {
                 }
 
                 /* Re-read the pin value */
-
                 ret = ioctl(fd, GPIOC_READ, (unsigned long)((uintptr_t)&invalue));
                 if (ret < 0) {
                     int errcode = errno;
