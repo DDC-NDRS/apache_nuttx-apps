@@ -53,14 +53,14 @@
  *
  ****************************************************************************/
 int obd_wait_response(FAR struct obd_dev_s* dev, uint8_t opmode, uint8_t pid, int timeout) {
-    int nbytes;
-    int msgdlc;
-    int msgsize;
+    int     nbytes;
+    int     msgdlc;
+    int     msgsize;
     uint8_t extended;
 
-    #ifdef CONFIG_DEBUG_INFO
+#ifdef CONFIG_DEBUG_INFO
     printf("Waiting Response for pid=%d\n", pid);
-    #endif
+#endif
 
     /* Verify what is the current mode */
     if (dev->can_mode == CAN_EXT) {
@@ -79,23 +79,23 @@ int obd_wait_response(FAR struct obd_dev_s* dev, uint8_t opmode, uint8_t pid, in
             return -EAGAIN;
         }
 
-        #ifdef CONFIG_DEBUG_INFO
+#ifdef CONFIG_DEBUG_INFO
         printf("  ID: %4u DLC: %u\n", dev->can_rxmsg.cm_hdr.ch_id, dev->can_rxmsg.cm_hdr.ch_dlc);
-        #endif
+#endif
 
         msgdlc = dev->can_rxmsg.cm_hdr.ch_dlc;
 
-        #ifdef CONFIG_DEBUG_INFO
+#ifdef CONFIG_DEBUG_INFO
         printf("Data received:\n");
         for (int i = 0; i < msgdlc; i++) {
             printf("  %d: 0x%02x\n", i, dev->can_rxmsg.cm_data[i]);
         }
 
         fflush(stdout);
-        #endif
+#endif
 
         /* Check if we received a Response Message */
-        if ((extended  && dev->can_rxmsg.cm_hdr.ch_id == OBD_PID_EXT_RESPONSE) ||
+        if ((extended && dev->can_rxmsg.cm_hdr.ch_id == OBD_PID_EXT_RESPONSE) ||
             (!extended && dev->can_rxmsg.cm_hdr.ch_id == OBD_PID_STD_RESPONSE)) {
             /* Check if the Response if for the PID we are interested! */
             if (dev->can_rxmsg.cm_data[1] == (opmode + OBD_RESP_BASE) && dev->can_rxmsg.cm_data[2] == pid) {

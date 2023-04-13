@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
@@ -37,7 +36,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Name: canlib_getsilent
  *
@@ -54,20 +52,17 @@
  *   nature of the error.
  *
  ****************************************************************************/
+int canlib_getsilent(int fd, FAR bool* silent) {
+    struct canioc_connmodes_s connmodes;
+    int ret;
 
-int canlib_getsilent(int fd, FAR bool *silent)
-{
-  int ret;
-  struct canioc_connmodes_s connmodes;
-
-  ret = ioctl(fd, CANIOC_GET_CONNMODES, (unsigned long)&connmodes);
-  if (ret != OK)
-    {
-      canerr("CANIOC_GET_CONNMODES failed, errno=%d\n", errno);
-      return FALSE;
+    ret = ioctl(fd, CANIOC_GET_CONNMODES, (unsigned long)&connmodes);
+    if (ret != OK) {
+        canerr("CANIOC_GET_CONNMODES failed, errno=%d\n", errno);
+        return (FALSE);
     }
 
-  *silent = (bool)connmodes.bm_silent;
+    *silent = (bool)connmodes.bm_silent;
 
-  return ret;
+    return (ret);
 }

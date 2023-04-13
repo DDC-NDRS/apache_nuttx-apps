@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
@@ -39,7 +38,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Name: obd_init
  *
@@ -49,63 +47,51 @@
  *   Returns a obd_dev_s with initial values or NULL if error.
  *
  ****************************************************************************/
+struct obd_dev_s* obd_init(char* devfile, int baudate, int mode) {
+    struct obd_dev_s* dev;
+    int ret;
 
-struct obd_dev_s *obd_init(char *devfile, int baudate, int mode)
-{
-  struct obd_dev_s *dev;
-  int ret;
-
-  /* Alloc memory for this device */
-
-  dev = malloc(sizeof(struct obd_dev_s));
-  if (!dev)
-    {
-      printf("ERROR: Failed to alloc memory for obd_dev!\n");
-      return NULL;
+    /* Alloc memory for this device */
+    dev = malloc(sizeof(struct obd_dev_s));
+    if (!dev) {
+        printf("ERROR: Failed to alloc memory for obd_dev!\n");
+        return NULL;
     }
 
-  /* Open the CAN device for reading/writing */
-
-  dev->can_fd = open(devfile, O_RDWR);
-  if (dev->can_fd < 0)
-    {
-      printf("ERROR: open %s failed: %d\n", devfile, errno);
-      return NULL;
+    /* Open the CAN device for reading/writing */
+    dev->can_fd = open(devfile, O_RDWR);
+    if (dev->can_fd < 0) {
+        printf("ERROR: open %s failed: %d\n", devfile, errno);
+        return NULL;
     }
 
-  /* Show bit timing information if provided by the driver.  Not all CAN
-   * drivers will support this IOCTL.
-   */
-
-  ret = ioctl(dev->can_fd, CANIOC_GET_BITTIMING,
-              (unsigned long)((uintptr_t)&dev->can_bt));
-  if (ret < 0)
-    {
-      printf("Bit timing not available: %d\n", errno);
-      return NULL;
+    /* Show bit timing information if provided by the driver.  Not all CAN
+     * drivers will support this IOCTL.
+     */
+    ret = ioctl(dev->can_fd, CANIOC_GET_BITTIMING, (unsigned long)((uintptr_t)&dev->can_bt));
+    if (ret < 0) {
+        printf("Bit timing not available: %d\n", errno);
+        return NULL;
     }
-  else
-    {
-      printf("Bit timing:\n");
-      printf("   Baud: %lu\n", (unsigned long)dev->can_bt.bt_baud);
-      printf("  TSEG1: %u\n", dev->can_bt.bt_tseg1);
-      printf("  TSEG2: %u\n", dev->can_bt.bt_tseg2);
-      printf("    SJW: %u\n", dev->can_bt.bt_sjw);
+    else {
+        printf("Bit timing:\n");
+        printf("   Baud: %lu\n", (unsigned long)dev->can_bt.bt_baud);
+        printf("  TSEG1: %u\n", dev->can_bt.bt_tseg1);
+        printf("  TSEG2: %u\n", dev->can_bt.bt_tseg2);
+        printf("    SJW: %u\n", dev->can_bt.bt_sjw);
     }
 
-  /* FIXME: Setup the baudrate */
+    /* FIXME: Setup the baudrate */
 
-  /* Setup the initial mode */
-
-  if (mode != CAN_STD && mode != CAN_EXT)
-    {
-      printf("ERROR: Invalid mode, it needs to be CAN_STD or CAN_EXT!\n");
-      return NULL;
+    /* Setup the initial mode */
+    if (mode != CAN_STD && mode != CAN_EXT) {
+        printf("ERROR: Invalid mode, it needs to be CAN_STD or CAN_EXT!\n");
+        return NULL;
     }
 
-  dev->can_mode = mode;
+    dev->can_mode = mode;
 
-  printf("OBD-II device initialized!\n");
+    printf("OBD-II device initialized!\n");
 
-  return dev;
+    return (dev);
 }

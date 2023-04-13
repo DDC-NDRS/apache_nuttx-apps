@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
@@ -37,7 +36,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Name: canlib_getloopback
  *
@@ -54,20 +52,17 @@
  *   nature of the error.
  *
  ****************************************************************************/
+int canlib_getloopback(int fd, FAR bool* loopback) {
+    struct canioc_connmodes_s connmodes;
+    int ret;
 
-int canlib_getloopback(int fd, FAR bool *loopback)
-{
-  int ret;
-  struct canioc_connmodes_s connmodes;
-
-  ret = ioctl(fd, CANIOC_GET_CONNMODES, (unsigned long)&connmodes);
-  if (ret != OK)
-    {
-      canerr("CANIOC_GET_CONNMODES failed, errno=%d\n", errno);
-      return FALSE;
+    ret = ioctl(fd, CANIOC_GET_CONNMODES, (unsigned long)&connmodes);
+    if (ret != OK) {
+        canerr("CANIOC_GET_CONNMODES failed, errno=%d\n", errno);
+        return FALSE;
     }
 
-  *loopback = (bool)connmodes.bm_loopback;
+    *loopback = (bool)connmodes.bm_loopback;
 
-  return ret;
+    return (ret);
 }

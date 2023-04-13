@@ -60,7 +60,7 @@ static char g_data[MAXDATA];
  ****************************************************************************/
 FAR char* obd_decode_pid(FAR struct obd_dev_s* dev, uint8_t pid) {
     uint32_t pids;
-    int      rpm;
+    int rpm;
 
     /* Verify if received data is valid */
     if (dev->data[2] != pid) {
