@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <sys/ioctl.h>
@@ -36,7 +35,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 /****************************************************************************
  * Name: canlib_setbaud
  *
@@ -53,26 +51,22 @@
  *   nature of the error.
  *
  ****************************************************************************/
+int canlib_setbaud(int fd, int bauds) {
+    struct canioc_bittiming_s timings;
+    int ret;
 
-int canlib_setbaud(int fd, int bauds)
-{
-  int ret;
-  struct canioc_bittiming_s timings;
-
-  ret = ioctl(fd, CANIOC_GET_BITTIMING, (unsigned long)&timings);
-  if (ret != OK)
-    {
-      canerr("CANIOC_GET_BITTIMING failed, errno=%d\n", errno);
-      return ret;
+    ret = ioctl(fd, CANIOC_GET_BITTIMING, (unsigned long)&timings);
+    if (ret != OK) {
+        canerr("CANIOC_GET_BITTIMING failed, errno=%d\n", errno);
+        return (ret);
     }
 
-  timings.bt_baud = bauds;
+    timings.bt_baud = bauds;
 
-  ret = ioctl(fd, CANIOC_SET_BITTIMING, (unsigned long)&timings);
-  if (ret != OK)
-    {
-      canerr("CANIOC_SET_BITTIMING failed, errno=%d\n", errno);
+    ret = ioctl(fd, CANIOC_SET_BITTIMING, (unsigned long)&timings);
+    if (ret != OK) {
+        canerr("CANIOC_SET_BITTIMING failed, errno=%d\n", errno);
     }
 
-  return ret;
+    return (ret);
 }

@@ -21,7 +21,6 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
 #include <nuttx/config.h>
 
 #include <stdio.h>
@@ -29,14 +28,14 @@
 #include <wchar.h>
 #include <syslog.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "minmea/minmea.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define MINMEA_MAX_LENGTH    256
+#define MINMEA_MAX_LENGTH 256
 
 /****************************************************************************
  * Public Functions
@@ -45,103 +44,75 @@
 /****************************************************************************
  * gps_main
  ****************************************************************************/
+int main(int argc, FAR char* argv[]) {
+    int  fd;
+    int  cnt;
+    char ch;
+    char line[MINMEA_MAX_LENGTH];
 
-int main(int argc, FAR char *argv[])
-{
-  int fd;
-  int cnt;
-  char ch;
-  char line[MINMEA_MAX_LENGTH];
-
-  /* Open the GPS serial port */
-
-  fd = open("/dev/ttyS1", O_RDONLY);
-  if (fd < 0)
-    {
-      printf("Unable to open file /dev/ttyS1\n");
+    /* Open the GPS serial port */
+    fd = open("/dev/ttyS1", O_RDONLY);
+    if (fd < 0) {
+        printf("Unable to open file /dev/ttyS1\n");
     }
 
-  /* Run forever */
-
-  for (; ; )
-    {
-      /* Read until we complete a line */
-
-      cnt = 0;
-      do
-        {
-          read(fd, &ch, 1);
-          if (ch != '\r' && ch != '\n')
-            {
-              line[cnt++] = ch;
+    /* Run forever */
+    for (;;) {
+        /* Read until we complete a line */
+        cnt = 0;
+        do {
+            read(fd, &ch, 1);
+            if (ch != '\r' && ch != '\n') {
+                line[cnt++] = ch;
             }
-        }
-      while (ch != '\r' && ch != '\n');
+        } while (ch != '\r' && ch != '\n');
 
-      line[cnt] = '\0';
+        line[cnt] = '\0';
 
-      switch (minmea_sentence_id(line, false))
-        {
-          case MINMEA_SENTENCE_RMC:
-            {
-              struct minmea_sentence_rmc frame;
+        switch (minmea_sentence_id(line, false)) {
+            case MINMEA_SENTENCE_RMC : {
+                struct minmea_sentence_rmc frame;
 
-              if (minmea_parse_rmc(&frame, line))
-                {
-                  printf("Fixed-point Latitude...........: %d\n",
-                         minmea_rescale(&frame.latitude, 1000));
-                  printf("Fixed-point Longitude..........: %d\n",
-                         minmea_rescale(&frame.longitude, 1000));
-                  printf("Fixed-point Speed..............: %d\n",
-                         minmea_rescale(&frame.speed, 1000));
-                  printf("Floating point degree latitude.: %2.6f\n",
-                         minmea_tocoord(&frame.latitude));
-                  printf("Floating point degree longitude: %2.6f\n",
-                         minmea_tocoord(&frame.longitude));
-                  printf("Floating point speed...........: %2.6f\n",
-                         minmea_tocoord(&frame.speed));
+                if (minmea_parse_rmc(&frame, line)) {
+                    printf("Fixed-point Latitude...........: %" PRIdLEAST32 "\n",
+                           minmea_rescale(&frame.latitude, 1000));
+                    printf("Fixed-point Longitude..........: %" PRIdLEAST32 "\n",
+                           minmea_rescale(&frame.longitude, 1000));
+                    printf("Fixed-point Speed..............: %" PRIdLEAST32 "\n", minmea_rescale(&frame.speed, 1000));
+                    printf("Floating point degree latitude.: %2.6f\n", minmea_tocoord(&frame.latitude));
+                    printf("Floating point degree longitude: %2.6f\n", minmea_tocoord(&frame.longitude));
+                    printf("Floating point speed...........: %2.6f\n", minmea_tocoord(&frame.speed));
                 }
-              else
-                {
+                else {
                     printf("$xxRMC sentence is not parsed\n");
                 }
-            }
-            break;
+            } break;
 
-          case MINMEA_SENTENCE_GGA:
-            {
-              struct minmea_sentence_gga frame;
+            case MINMEA_SENTENCE_GGA : {
+                struct minmea_sentence_gga frame;
 
-              if (minmea_parse_gga(&frame, line))
-                {
-                  printf("Fix quality....................: %d\n",
-                         frame.fix_quality);
-                  printf("Altitude.......................: %d\n",
-                         frame.altitude.value);
-                  printf("Tracked satellites.............: %d\n",
-                         frame.satellites_tracked);
+                if (minmea_parse_gga(&frame, line)) {
+                    printf("Fix quality....................: %d\n", frame.fix_quality);
+                    printf("Altitude.......................: %" PRIdLEAST32 "\n", frame.altitude.value);
+                    printf("Tracked satellites.............: %d\n", frame.satellites_tracked);
                 }
-              else
-                {
-                  printf("$xxGGA sentence is not parsed\n");
+                else {
+                    printf("$xxGGA sentence is not parsed\n");
                 }
-            }
-            break;
+            } break;
 
-          case MINMEA_INVALID:
-          case MINMEA_UNKNOWN:
-          case MINMEA_SENTENCE_GSA:
-          case MINMEA_SENTENCE_GLL:
-          case MINMEA_SENTENCE_GST:
-          case MINMEA_SENTENCE_GSV:
-          case MINMEA_SENTENCE_GBS:
-          case MINMEA_SENTENCE_VTG:
-          case MINMEA_SENTENCE_ZDA:
-            {
-            }
-            break;
+            case MINMEA_INVALID :
+            case MINMEA_UNKNOWN :
+            case MINMEA_SENTENCE_GSA :
+            case MINMEA_SENTENCE_GLL :
+            case MINMEA_SENTENCE_GST :
+            case MINMEA_SENTENCE_GSV :
+            case MINMEA_SENTENCE_GBS :
+            case MINMEA_SENTENCE_VTG :
+            case MINMEA_SENTENCE_ZDA : {
+            } break;
         }
     }
 
-  return 0;
+    return 0;
 }
